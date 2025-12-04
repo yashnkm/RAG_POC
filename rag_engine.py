@@ -175,6 +175,8 @@ HOW TO ANSWER:
 
     def run_agent(self, question: str):
         """Run the agentic RAG and capture ALL tool calls for complex multi-part questions"""
+        from langchain_core.messages import AIMessage
+
         agent, tools = self.create_rag_agent()
 
         # Collect all steps and ALL tool calls across iterations
@@ -201,8 +203,8 @@ HOW TO ANSWER:
             if hasattr(last_msg, 'artifact') and last_msg.artifact:
                 all_retrieved_docs.extend(last_msg.artifact)
 
-            # Get final answer (last AI content message that's not empty)
-            if hasattr(last_msg, 'content') and isinstance(last_msg.content, str) and last_msg.content.strip():
+            # Get final answer - ONLY from AIMessage (not HumanMessage or ToolMessage)
+            if isinstance(last_msg, AIMessage) and last_msg.content and isinstance(last_msg.content, str) and last_msg.content.strip():
                 if not (hasattr(last_msg, 'tool_calls') and last_msg.tool_calls):
                     final_answer = last_msg.content
 
