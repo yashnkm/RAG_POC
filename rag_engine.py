@@ -204,9 +204,20 @@ HOW TO ANSWER:
                 all_retrieved_docs.extend(last_msg.artifact)
 
             # Get final answer - ONLY from AIMessage (not HumanMessage or ToolMessage)
-            if isinstance(last_msg, AIMessage) and last_msg.content and isinstance(last_msg.content, str) and last_msg.content.strip():
-                if not (hasattr(last_msg, 'tool_calls') and last_msg.tool_calls):
-                    final_answer = last_msg.content
+            if isinstance(last_msg, AIMessage):
+                # Skip if this message has tool calls (it's not the final answer yet)
+                if hasattr(last_msg, 'tool_calls') and last_msg.tool_calls:
+                    continue
+
+                # Handle content that can be string or list
+                content = last_msg.content
+                if isinstance(content, list):
+                    # Extract text from list format
+                    text_parts = [part.get('text', '') if isinstance(part, dict) else str(part) for part in content]
+                    content = ''.join(text_parts)
+
+                if content and content.strip():
+                    final_answer = content
 
         return {
             "answer": final_answer,
