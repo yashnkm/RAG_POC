@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Demo Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            padding: 60px 80px;
+            position: relative;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Title Slide */
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .title-slide h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .title-slide h2 {
+            font-size: 1.8rem;
+            color: #888;
+            font-weight: 300;
+        }
+
+        .title-slide .session-badge {
+            margin-top: 40px;
+            padding: 15px 40px;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid #00d9ff;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            color: #00d9ff;
+        }
+
+        /* Section Header Slides */
+        .section-slide {
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+        }
+
+        .section-slide h1 {
+            font-size: 3.5rem;
+            color: #00d9ff;
+        }
+
+        .section-slide .subtitle {
+            font-size: 1.5rem;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        /* Content Slides */
+        .content-slide {
+            background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+        }
+
+        .content-slide h1 {
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: #00d9ff;
+            border-bottom: 3px solid #00d9ff;
+            padding-bottom: 15px;
+            display: inline-block;
+        }
+
+        .content-slide .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #00d9ff;
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            font-size: 1.4rem;
+            color: #00ff88;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card p {
+            color: #aaa;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+
+        /* List Items */
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list .icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .feature-list .text {
+            flex: 1;
+        }
+
+        .feature-list .text strong {
+            color: #00d9ff;
+        }
+
+        .feature-list .text span {
+            color: #888;
+            font-size: 1rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* RAG Diagram */
+        .rag-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .rag-step {
+            background: rgba(0, 217, 255, 0.1);
+            border: 2px solid #00d9ff;
+            border-radius: 15px;
+            padding: 25px 35px;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .rag-step .step-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .rag-step .step-title {
+            font-size: 1.1rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .rag-step .step-desc {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: #00ff88;
+        }
+
+        /* Comparison Table */
+        .comparison-container {
+            display: flex;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .comparison-box {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid;
+        }
+
+        .comparison-box.problem {
+            border-color: #ff4757;
+        }
+
+        .comparison-box.solution {
+            border-color: #00ff88;
+        }
+
+        .comparison-box h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comparison-box.problem h3 {
+            color: #ff4757;
+        }
+
+        .comparison-box.solution h3 {
+            color: #00ff88;
+        }
+
+        .comparison-box ul {
+            list-style: none;
+        }
+
+        .comparison-box ul li {
+            padding: 12px 0;
+            color: #ccc;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comparison-box.problem ul li::before {
+            content: "✗";
+            color: #ff4757;
+            font-weight: bold;
+        }
+
+        .comparison-box.solution ul li::before {
+            content: "✓";
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        /* POC Slide */
+        .poc-slide {
+           justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 50%, #16213e 100%);
+        }
+
+        .poc-slide h1 {
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            color: #00ff88;
+        }
+
+        .poc-slide .tech-stack {
+            display: flex;
+            gap: 40px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px 35px;
+            text-align: center;
+        }
+
+        .tech-item .tech-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .tech-item .tech-name {
+            font-size: 1.1rem;
+            color: #fff;
+        }
+
+        .tech-item .tech-desc {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .start-demo-btn {
+            margin-top: 50px;
+            padding: 20px 60px;
+            font-size: 1.3rem;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            border: none;
+            border-radius: 50px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .start-demo-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            align-items: flex-start;
+        }
+
+        .timeline-marker {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 3px solid #00d9ff;
+        }
+
+        .timeline-content h3 {
+            color: #00d9ff;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .timeline-content p {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #00d9ff;
+            background: rgba(0, 217, 255, 0.1);
+            color: #00d9ff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav button:hover {
+            background: #00d9ff;
+            color: #000;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+
+        /* Slide Counter */
+        .slide-counter {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(0, 255, 136, 0.1));
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .highlight-box p {
+            font-size: 1.4rem;
+            color: #fff;
+            line-height: 1.8;
+        }
+
+        .highlight-box strong {
+            color: #00ff88;
+        }
+
+        /* Concepts Grid */
+        .concepts-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .concept-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .concept-card:hover {
+            border-color: #00d9ff;
+            transform: translateY(-5px);
+        }
+
+        .concept-card .concept-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .concept-card h3 {
+            color: #00d9ff;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .concept-card p {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Slide 1: Title -->
+    <div class="slide title-slide active">
+        <h1>RAG Deep Dive</h1>
+        <h2>From Theory to Proof of concept</h2>
+        <div class="session-badge">Session 2: Live Demo</div>
+    </div>
+
+    <!-- Slide 2: Last Session Recap Header -->
+    <div class="slide section-slide">
+        <h1>Quick Recap</h1>
+        <div class="subtitle">What we covered in Session 1</div>
+    </div>
+
+    <!-- Slide 3: Session 1 Recap - AI Fundamentals -->
+    <div class="slide content-slide">
+        <h1>Session 1 Recap: AI Fundamentals</h1>
+        <div class="content">
+            <div class="cards-grid" style="grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px;">
+                <div class="card" style="padding: 20px;">
+                    <h3 style="font-size: 1.1rem;">🤖 Generative AI</h3>
+                    <p style="font-size: 0.95rem;">AI that creates new content - text, images, code, audio from patterns learned in training data</p>
+                </div>
+                <div class="card" style="padding: 20px;">
+                    <h3 style="font-size: 1.1rem;">💬 LLMs</h3>
+                    <p style="font-size: 0.95rem;">Large Language Models - trained on massive text data to understand and generate human language</p>
+                </div>
+                <div class="card" style="padding: 20px;">
+                    <h3 style="font-size: 1.1rem;">🔧 Popular LLMs</h3>
+                    <p style="font-size: 0.95rem;">ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), Llama (Meta), Copilot (Microsoft)</p>
+                </div>
+            </div>
+
+            <div class="cards-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card" style="padding: 20px; border-color: #00ff88;">
+                    <h3 style="font-size: 1.1rem; color: #00ff88;">✓ Use Cases of LLMs</h3>
+                    <ul style="color: #aaa; font-size: 0.9rem; list-style: none; line-height: 1.8;">
+                        <li>• Content generation & summarization</li>
+                        <li>• Code assistance & debugging</li>
+                        <li>• Customer support chatbots</li>
+                        <li>• Translation & language tasks</li>
+                        <li>• Research & analysis</li>
+                    </ul>
+                </div>
+                <div class="card" style="padding: 20px; border-color: #ff4757;">
+                    <h3 style="font-size: 1.1rem; color: #ff4757;">✗ Limitations</h3>
+                    <ul style="color: #aaa; font-size: 0.9rem; list-style: none; line-height: 1.8;">
+                        <li>• Knowledge cutoff - outdated info</li>
+                        <li>• No access to private/company data</li>
+                        <li>• Hallucinations - makes up facts</li>
+                        <li>• No source citations</li>
+                        <li>• Can't verify accuracy</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Concepts Covered -->
+    <div class="slide content-slide">
+        <h1>Concepts We Covered</h1>
+        <div class="content">
+            <div class="concepts-grid">
+                <div class="concept-card">
+                    <div class="concept-icon">📚</div>
+                    <h3>RAG</h3>
+                    <p>Retrieval-Augmented Generation - Fetch relevant docs before generating</p>
+                </div>
+                <div class="concept-card">
+                    <div class="concept-icon">🤖</div>
+                    <h3>Agents</h3>
+                    <p>LLMs that can use tools and take actions autonomously</p>
+                </div>
+                <div class="concept-card">
+                    <div class="concept-icon">🧠</div>
+                    <h3>Agentic RAG</h3>
+                    <p>Agent decides WHEN to retrieve - smarter retrieval</p>
+                </div>
+                <div class="concept-card">
+                    <div class="concept-icon">🔌</div>
+                    <h3>MCP</h3>
+                    <p>Model Context Protocol - Standardized tool connections</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Today's Session Header -->
+    <div class="slide section-slide">
+        <h1>Today's Session</h1>
+        <div class="subtitle">RAG in Action - Live Demo</div>
+    </div>
+
+    <!-- Slide 6: What is RAG - Simple Definition -->
+    <div class="slide content-slide">
+        <h1>What is RAG?</h1>
+        <div class="content">
+            <div class="highlight-box" style="padding: 20px; margin-bottom: 20px;">
+                <p style="font-size: 1.2rem;">
+                    <strong>RAG = Retrieval-Augmented Generation</strong><br><br>
+                    An AI technique that combines <strong>LLMs with external data sources</strong><br>
+                    to improve accuracy and relevance of responses
+                </p>
+            </div>
+
+            <!-- Traditional LLM Flow -->
+            <div style="margin-bottom: 25px;">
+                <h3 style="color: #ff4757; margin-bottom: 15px; font-size: 1.1rem;">❌ Traditional LLM (Without RAG)</h3>
+                <div class="rag-flow" style="margin: 0;">
+                    <div class="rag-step" style="border-color: #ff4757; background: rgba(255, 71, 87, 0.1); padding: 15px 25px;">
+                        <div class="step-icon" style="font-size: 1.8rem;">❓</div>
+                        <div class="step-title" style="font-size: 0.95rem;">Question</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="rag-step" style="border-color: #ff4757; background: rgba(255, 71, 87, 0.1); padding: 15px 25px;">
+                        <div class="step-icon" style="font-size: 1.8rem;">🤖</div>
+                        <div class="step-title" style="font-size: 0.95rem;">LLM</div>
+                        <div class="step-desc">Training data only</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="rag-step" style="border-color: #ff4757; background: rgba(255, 71, 87, 0.1); padding: 15px 25px;">
+                        <div class="step-icon" style="font-size: 1.8rem;">⚠️</div>
+                        <div class="step-title" style="font-size: 0.95rem;">Answer</div>
+                        <div class="step-desc">May hallucinate</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RAG Flow -->
+            <div>
+                <h3 style="color: #00ff88; margin-bottom: 15px; font-size: 1.1rem;">✓ With RAG</h3>
+                <div class="rag-flow" style="margin: 0;">
+                    <div class="rag-step" style="padding: 15px 25px;">
+                        <div class="step-icon" style="font-size: 1.8rem;">❓</div>
+                        <div class="step-title" style="font-size: 0.95rem;">Question</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="rag-step" style="padding: 15px 25px;">
+                        <div class="step-icon" style="font-size: 1.8rem;">🔍</div>
+                        <div class="step-title" style="font-size: 0.95rem;">Retrieve</div>
+                        <div class="step-desc">Search docs</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="rag-step" style="padding: 15px 25px;">
+                        <div class="step-icon" style="font-size: 1.8rem;">📄</div>
+                        <div class="step-title" style="font-size: 0.95rem;">Augment</div>
+                        <div class="step-desc">Add context</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="rag-step" style="padding: 15px 25px;">
+                        <div class="step-icon" style="font-size: 1.8rem;">🤖</div>
+                        <div class="step-title" style="font-size: 0.95rem;">Generate</div>
+                        <div class="step-desc">LLM + Context</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="rag-step" style="padding: 15px 25px;">
+                        <div class="step-icon" style="font-size: 1.8rem;">✅</div>
+                        <div class="step-title" style="font-size: 0.95rem;">Answer</div>
+                        <div class="step-desc">Accurate!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: RAG Pipeline Detailed -->
+    <div class="slide content-slide">
+        <h1>The RAG Pipeline</h1>
+        <div class="content">
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">1</div>
+                    <div class="timeline-content">
+                        <h3>Load Documents</h3>
+                        <p>Ingest your data - PDFs, docs, text files, web pages, databases</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">2</div>
+                    <div class="timeline-content">
+                        <h3>Chunk Documents</h3>
+                        <p>Split into smaller pieces for precise retrieval</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">3</div>
+                    <div class="timeline-content">
+                        <h3>Create Embeddings</h3>
+                        <p>Convert text to vectors that capture meaning</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker">4</div>
+                    <div class="timeline-content">
+                        <h3>Store & Retrieve</h3>
+                        <p>Save in vector DB, find similar chunks at query time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Sample Documents -->
+    <div class="slide content-slide">
+        <h1>Our Sample Documents</h1>
+        <div class="content">
+            <p style="color: #888; font-size: 1.2rem; margin-bottom: 30px;">TechCorp's internal knowledge base - 4 policy documents</p>
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>📋 HR Policy</h3>
+                    <p>
+                        <strong>Contains:</strong> Leave policies (20 annual days), working hours,
+                        remote work guidelines, performance reviews, dress code, employee benefits
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>🔐 IT Policy</h3>
+                    <p>
+                        <strong>Contains:</strong> Password requirements (12 chars, 90-day rotation),
+                        VPN usage, data security, approved software, incident reporting
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>💰 Expense Policy</h3>
+                    <p>
+                        <strong>Contains:</strong> Travel limits ($200/night domestic), meal allowances
+                        ($15/$25/$45), client entertainment ($75/person), reimbursement process
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>🏢 Company Profile</h3>
+                    <p>
+                        <strong>Contains:</strong> TechCorp overview, mission & values,
+                        office locations, company history, organizational structure
+                    </p>
+                </div>
+            </div>
+            <div class="highlight-box" style="margin-top: 30px;">
+                <p style="font-size: 1.1rem;">
+                    Total: ~8,000 characters → Split into <strong>~16 chunks</strong> → <strong>16 vectors</strong> in ChromaDB
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: POC Introduction -->
+    <div class="slide poc-slide">
+        <h1>Live Demo</h1>
+        <h2 style="color: #888; font-weight: 300; margin-bottom: 20px;">TechCorp Internal Knowledge Base</h2>
+        <div class="tech-stack">
+            <div class="tech-item">
+                <div class="tech-icon">🦜</div>
+                <div class="tech-name">LangChain</div>
+                <div class="tech-desc">Orchestration</div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">✨</div>
+                <div class="tech-name">Gemini 2.5</div>
+                <div class="tech-desc">LLM</div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">🗄️</div>
+                <div class="tech-name">ChromaDB</div>
+                <div class="tech-desc">Vector Store</div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">🎨</div>
+                <div class="tech-name">Streamlit</div>
+                <div class="tech-desc">UI</div>
+            </div>
+        </div>
+        <p style="color: #888; font-size: 1.2rem; margin-top: 30px;">
+            Scenario: Employees asking questions about company policies
+        </p>
+        <button class="start-demo-btn" onclick="alert('Switch to Streamlit app!')">
+            Start Live Demo →
+        </button>
+    </div>
+
+    <!-- Slide 10: What is Agentic RAG -->
+    <div class="slide content-slide" style="padding: 40px 60px;">
+        <h1 style="margin-bottom: 30px;">What is Agentic RAG?</h1>
+        <div class="content" style="justify-content: flex-start;">
+            <div class="highlight-box" style="padding: 15px; margin-bottom: 15px;">
+                <p style="font-size: 1.1rem;">
+                    <strong>Agentic RAG = RAG + Intelligent Decision Making</strong><br>
+                    The LLM acts as an <strong>agent</strong> that decides <strong>when</strong> and <strong>how</strong> to retrieve
+                </p>
+            </div>
+
+            <!-- Basic RAG Flow -->
+            <div style="margin-bottom: 15px;">
+                <h3 style="color: #ff4757; margin-bottom: 10px; font-size: 1rem;">📚 Basic RAG (Always Retrieves)</h3>
+                <div class="rag-flow" style="margin: 0; gap: 15px;">
+                    <div class="rag-step" style="border-color: #ff4757; background: rgba(255, 71, 87, 0.1); padding: 10px 20px;">
+                        <div class="step-icon" style="font-size: 1.5rem;">❓</div>
+                        <div class="step-title" style="font-size: 0.85rem;">Any Question</div>
+                    </div>
+                    <div class="arrow" style="font-size: 1.5rem;">→</div>
+                    <div class="rag-step" style="border-color: #ff4757; background: rgba(255, 71, 87, 0.1); padding: 10px 20px;">
+                        <div class="step-icon" style="font-size: 1.5rem;">🔍</div>
+                        <div class="step-title" style="font-size: 0.85rem;">Always Search</div>
+                    </div>
+                    <div class="arrow" style="font-size: 1.5rem;">→</div>
+                    <div class="rag-step" style="border-color: #ff4757; background: rgba(255, 71, 87, 0.1); padding: 10px 20px;">
+                        <div class="step-icon" style="font-size: 1.5rem;">🤖</div>
+                        <div class="step-title" style="font-size: 0.85rem;">Generate</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agentic RAG Flow -->
+            <div style="margin-bottom: 15px;">
+                <h3 style="color: #00ff88; margin-bottom: 10px; font-size: 1rem;">🤖 Agentic RAG (Smart Decisions)</h3>
+                <div class="rag-flow" style="margin: 0; gap: 15px;">
+                    <div class="rag-step" style="padding: 10px 20px;">
+                        <div class="step-icon" style="font-size: 1.5rem;">❓</div>
+                        <div class="step-title" style="font-size: 0.85rem;">Question</div>
+                    </div>
+                    <div class="arrow" style="font-size: 1.5rem;">→</div>
+                    <div class="rag-step" style="padding: 10px 20px; border-color: #00ff88;">
+                        <div class="step-icon" style="font-size: 1.5rem;">🧠</div>
+                        <div class="step-title" style="font-size: 0.85rem;">Analyze</div>
+                    </div>
+                    <div class="arrow" style="font-size: 1.5rem;">→</div>
+                    <div class="rag-step" style="padding: 10px 20px; border-color: #ffc107;">
+                        <div class="step-icon" style="font-size: 1.5rem;">⚖️</div>
+                        <div class="step-title" style="font-size: 0.85rem;">Decide</div>
+                    </div>
+                    <div class="arrow" style="font-size: 1.5rem;">→</div>
+                    <div class="rag-step" style="padding: 10px 20px;">
+                        <div class="step-icon" style="font-size: 1.5rem;">✅</div>
+                        <div class="step-title" style="font-size: 0.85rem;">Answer</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cards-grid" style="margin-top: 15px; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                <div class="card" style="padding: 15px;">
+                    <h3 style="font-size: 0.95rem;">🎯 Single Topic</h3>
+                    <p style="font-size: 0.8rem;">"Leave policy?" → 1 search</p>
+                </div>
+                <div class="card" style="padding: 15px;">
+                    <h3 style="font-size: 0.95rem;">🔀 Multi-Part</h3>
+                    <p style="font-size: 0.8rem;">"Leave AND password?" → 2 searches</p>
+                </div>
+                <div class="card" style="padding: 15px;">
+                    <h3 style="font-size: 0.95rem;">💡 General Knowledge</h3>
+                    <p style="font-size: 0.8rem;">"What is 2+2?" → No search needed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+        <button onclick="prevSlide()">←</button>
+        <button onclick="nextSlide()">→</button>
+    </div>
+
+    <div class="slide-counter" id="slideCounter">1 / 10</div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+
+            // Update progress bar
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Update counter
+            document.getElementById('slideCounter').textContent =
+                (currentSlide + 1) + ' / ' + totalSlides;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>

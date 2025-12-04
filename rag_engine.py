@@ -51,10 +51,16 @@ class RAGEngine:
     def create_vectorstore(self):
         """Create embeddings and store in ChromaDB"""
         self.embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+
+        # Generate unique IDs for each chunk to prevent duplicates
+        ids = [f"{chunk.metadata['source']}_{i}" for i, chunk in enumerate(self.chunks)]
+
+        # Create fresh vectorstore (in-memory, resets each time)
         self.vectorstore = Chroma.from_documents(
             documents=self.chunks,
             embedding=self.embeddings,
-            collection_name="rag_demo"
+            collection_name="rag_demo",
+            ids=ids
         )
         return self.vectorstore
 
@@ -72,16 +78,17 @@ class RAGEngine:
 
     def generate_answer(self, query: str, context: str):
         """Generate answer using Gemini WITH RAG context"""
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a helpful assistant answering questions based on the provided context.
+        prompt = ChatPromptTemplate.from_template(
+"""You are a helpful assistant. Use the context below to answer the question.
+If the context is helpful, use it. If not, you can still provide a helpful answer.
 
-Use ONLY the information from the context below to answer the question.
-If the answer is not in the context, say "I don't have enough information to answer that question."
+Context from company documents:
+{context}
 
-Context:
-{context}"""),
-            ("human", "{question}")
-        ])
+Question: {question}
+
+Provide a clear and helpful answer:"""
+        )
 
         llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
         chain = prompt | llm | StrOutputParser()
@@ -90,10 +97,13 @@ Context:
 
     def generate_without_rag(self, query: str):
         """Generate answer using Gemini WITHOUT any context (No RAG)"""
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are a helpful assistant. Answer the question based on your general knowledge."),
-            ("human", "{question}")
-        ])
+        prompt = ChatPromptTemplate.from_template(
+"""You are a helpful assistant. Answer the question based on your general knowledge.
+
+Question: {question}
+
+Answer:"""
+        )
 
         llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
         chain = prompt | llm | StrOutputParser()
@@ -120,41 +130,52 @@ Context:
 
     # ----- AGENTIC RAG -----
     def create_rag_agent(self):
-        """Create an agent with RAG tool"""
+        """Create an agent with RAG tool that dynamically handles multi-part queries"""
         vectorstore = self.vectorstore
 
-        @tool(response_format="content_and_artifact")
-        def search_company_docs(query: str):
-            """Search company documents for HR policies, IT policies, and expense policies.
-            Use this tool when you need information about company rules, leave policies,
-            password requirements, expense limits, or any internal company information."""
-            docs = vectorstore.similarity_search(query, k=3)
-            content = "\n\n".join(
-                f"[Source: {doc.metadata['source']}]\n{doc.page_content}"
-                for doc in docs
-            )
-            return content, docs
+        @tool
+        def search_documents(query: str) -> str:
+            """Search company documents. Use a focused, specific query for best results.
 
-        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
+            For multi-part questions, call this tool MULTIPLE times with different queries."""
+            docs = vectorstore.similarity_search(query, k=3)
+            if docs:
+                content = "\n\n".join(
+                    f"[Source: {doc.metadata['source']}]\n{doc.page_content}"
+                    for doc in docs
+                )
+                return content
+            return "No relevant information found for this query."
+
+        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.5)
 
         agent = create_react_agent(
             model=llm,
-            tools=[search_company_docs],
-            prompt="""You are a helpful company assistant with access to internal documents.
+            tools=[search_documents],
+            prompt="""You are a helpful company assistant with access to search company documents.
 
-When users ask about company policies (HR, IT, expenses, leave, TechCorp etc.),  or anything about techcorp use the search_company_docs tool to find accurate information.
-if the query has more than one part use the tool more than once to get a good analysis so basically repeat the prcoess of analysis and all
+WHEN TO USE THE SEARCH TOOL:
+- Questions about company policies, HR, IT, expenses, leave, TechCorp → USE search_documents
+- General knowledge questions (math, capitals, common facts) → Answer directly, NO search needed
 
-For general questions not related to company policies or techcorp, answer from your knowledge.
+FOR MULTI-PART QUESTIONS:
+If the question asks about multiple different topics (e.g., "leave policy AND password requirements AND core values"),
+make SEPARATE search calls for each topic:
+- Search 1: "leave policy"
+- Search 2: "password requirements"
+- Search 3: "core values"
 
-Always be helpful and cite which document the information came from when using the tool."""
+HOW TO ANSWER:
+- Use information from search results to give helpful answers
+- Cite which document the information came from
+- Be clear and comprehensive"""
         )
 
-        return agent, search_company_docs
+        return agent, [search_documents]
 
     def run_agent(self, question: str):
         """Run the agentic RAG and capture ALL tool calls for complex multi-part questions"""
-        agent, tool_func = self.create_rag_agent()
+        agent, tools = self.create_rag_agent()
 
         # Collect all steps and ALL tool calls across iterations
         steps = []
@@ -162,9 +183,11 @@ Always be helpful and cite which document the information came from when using t
         all_tool_calls = []
         all_retrieved_docs = []
 
+        # Stream with higher recursion limit to allow multiple tool calls
         for step in agent.stream(
             {"messages": [{"role": "user", "content": question}]},
             stream_mode="values",
+            config={"recursion_limit": 50}
         ):
             last_msg = step["messages"][-1]
             steps.append(last_msg)
@@ -174,13 +197,14 @@ Always be helpful and cite which document the information came from when using t
                 for tc in last_msg.tool_calls:
                     all_tool_calls.append(tc)
 
-            # Collect ALL retrieved docs
+            # Collect ALL retrieved docs from ToolMessages
             if hasattr(last_msg, 'artifact') and last_msg.artifact:
                 all_retrieved_docs.extend(last_msg.artifact)
 
-            # Get final answer (last content message)
-            if hasattr(last_msg, 'content') and isinstance(last_msg.content, str):
-                final_answer = last_msg.content
+            # Get final answer (last AI content message that's not empty)
+            if hasattr(last_msg, 'content') and isinstance(last_msg.content, str) and last_msg.content.strip():
+                if not (hasattr(last_msg, 'tool_calls') and last_msg.tool_calls):
+                    final_answer = last_msg.content
 
         return {
             "answer": final_answer,

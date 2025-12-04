@@ -371,14 +371,14 @@ with tab3:
                         </div>
                         ''', unsafe_allow_html=True)
 
-                        # Show ALL tool calls
-                        st.markdown("### 🔧 Tool Calls")
+                        # Show ALL tool calls - agent dynamically decides queries
+                        st.markdown("### 🔧 Agent's Search Calls")
                         for i, tc in enumerate(tool_calls, 1):
                             tool_query = tc.get('args', {}).get('query', 'N/A')
                             st.markdown(f'''
                             <div class="tool-call-box">
-                                <strong>🔧 Search #{i}</strong><br>
-                                <p>Query: "{tool_query}"</p>
+                                <strong>🔍 Search #{i}</strong><br>
+                                <p>Agent's query: "{tool_query}"</p>
                             </div>
                             ''', unsafe_allow_html=True)
 
