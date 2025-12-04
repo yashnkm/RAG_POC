@@ -1,0 +1,473 @@
+================================================================================
+                    RAG DEMO PRESENTATION SCRIPT (30 MINS)
+================================================================================
+
+================================================================================
+PART 1: QUICK RECAP (2 MINS)
+================================================================================
+
+[SLIDE/VERBAL ONLY - No demo yet]
+
+SPEAK:
+"Good morning/afternoon everyone. In our last session, we covered the theory
+behind RAG. Today, we're going to see it in action with a live demo."
+
+"Quick recap - RAG stands for Retrieval-Augmented Generation. The problem we're
+solving is simple: LLMs like ChatGPT or Gemini are incredibly smart, but they
+don't know anything about YOUR company's internal data - your policies, your
+documents, your knowledge base."
+
+"RAG solves this by adding a retrieval step. Before the LLM answers, we first
+search our documents, find relevant information, and feed that as context to
+the LLM. Now it can give accurate, grounded answers."
+
+"Let me show you exactly how this works."
+
+
+================================================================================
+PART 2: THE DEMO SETUP (3 MINS)
+================================================================================
+
+[OPEN THE STREAMLIT APP - show the interface]
+
+SPEAK:
+"Here's our demo application. Let me set the context for what we're building."
+
+"Imagine you're at TechCorp - a fictional company. TechCorp has internal
+documents: HR policies, IT security policies, expense reimbursement guidelines.
+Employees often have questions like 'How many leave days do I get?' or
+'What's the password policy?'"
+
+"Instead of searching through documents manually, we want employees to just
+ask questions in natural language and get accurate answers."
+
+"For this demo, I'm using:"
+"- LangChain for orchestrating the RAG pipeline"
+"- Google's Gemini 2.5 Flash as our LLM"
+"- ChromaDB as our vector database"
+"- And Streamlit for this user interface"
+
+[ENTER API KEY IN SIDEBAR IF NOT ALREADY SET]
+
+"Let me walk you through the three tabs - Document Processing, Basic RAG,
+and Agentic RAG."
+
+
+================================================================================
+PART 3: DOCUMENT PROCESSING - TAB 1 (8 MINS)
+================================================================================
+
+[CLICK ON TAB 1: DOCUMENT PROCESSING]
+
+-------------------------------------------------------------------------------
+STEP 1: LOAD DOCUMENTS (2 MINS)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"The first step in any RAG system is loading your documents."
+
+[CLICK "LOAD DOCUMENTS" BUTTON]
+
+"Here we're loading 4 text files - HR policy, IT policy, Expense policy, and
+a company profile. You can see each document loading with its size."
+
+"In a real-world scenario, these could be PDFs, Word documents, Confluence
+pages, SharePoint files, or even web pages. LangChain has loaders for all
+of these formats."
+
+"Notice each document is quite large - the HR policy alone is over 2000
+characters. This brings us to the next step."
+
+-------------------------------------------------------------------------------
+STEP 2: CHUNKING (3 MINS)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"Now here's an important concept - Chunking."
+
+"Why do we need to chunk? Two reasons:"
+"First, LLMs have a context limit - they can only process so much text at once."
+"Second, and more importantly, we want to retrieve RELEVANT portions, not
+entire documents."
+
+"Think of it like this - if someone asks about leave policy, we don't want to
+send the entire HR document. We want to send just the section about leaves."
+
+[SHOW THE SLIDERS]
+
+"We have two parameters here:"
+"- Chunk size: How big each piece should be. I've set it to 500 characters."
+"- Overlap: How much consecutive chunks should share. This is 50 characters."
+
+"Why overlap? Because if we cut exactly at 500 characters, we might split a
+sentence in the middle and lose context. Overlap ensures continuity."
+
+[CLICK "CREATE CHUNKS" BUTTON]
+
+"You can see we now have around 16 chunks created from our 4 documents. Each
+chunk shows which document it came from and its content."
+
+"A helpful analogy: Imagine you have a textbook. Instead of searching the
+whole book, you create an index of paragraphs. That's essentially what
+chunking does."
+
+-------------------------------------------------------------------------------
+STEP 3: EMBEDDINGS & VECTOR STORE (3 MINS)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"Now comes the magic - Embeddings."
+
+"We need to convert these text chunks into something a computer can search
+efficiently. We convert them into vectors - arrays of numbers."
+
+[CLICK "CREATE EMBEDDINGS & VECTOR STORE" BUTTON]
+
+"Watch what happens - each chunk gets converted into a vector."
+
+[POINT TO THE EMBEDDING NUMBERS SHOWN]
+
+"See these numbers? This is a sample of what an embedding looks like. Each
+chunk becomes a vector of 768 dimensions - 768 numbers that represent the
+MEANING of that text."
+
+"The key insight is: chunks with similar meanings will have similar vectors.
+So 'annual leave policy' and 'vacation days' would be close together in
+this vector space, even though the words are different."
+
+"All these vectors are stored in ChromaDB - our vector database. Think of it
+as a specialized database optimized for finding similar vectors."
+
+"Quick math: 16 chunks equals 16 vectors, all stored in 1 vector store."
+
+[WAIT FOR SUCCESS MESSAGE AND BALLOONS]
+
+"Perfect! Our RAG system is now ready to answer questions. Let's test it."
+
+
+================================================================================
+PART 4: BASIC RAG - TAB 2 (8 MINS)
+================================================================================
+
+[CLICK ON TAB 2: BASIC RAG]
+
+-------------------------------------------------------------------------------
+DEMO 1: RAG IN ACTION (3 MINS)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"Let's ask our first question."
+
+[TYPE: "How many days of annual leave do employees get?"]
+[MAKE SURE RAG TOGGLE IS ON]
+
+"Watch the step-by-step process:"
+
+[POINT TO EACH STEP AS IT APPEARS]
+
+"Step 1 - Query to Embedding: My question gets converted to a vector, just
+like we did with the chunks."
+
+"Step 2 - Similarity Search: The system searches the vector store and finds
+the chunks most similar to my question. You can see it found 3 relevant
+chunks, all from the HR policy document."
+
+"Step 3 - Build Context: These chunks are combined into a context block."
+
+"Step 4 - Generate Answer: Finally, this context along with my question is
+sent to Gemini, and it generates an accurate answer."
+
+[POINT TO THE ANSWER]
+
+"Look at the answer - it correctly says 20 days of annual leave. This
+information came directly from TechCorp's HR policy document. The LLM didn't
+make this up - it retrieved and used our actual company data."
+
+-------------------------------------------------------------------------------
+DEMO 2: RAG OFF - THE CONTRAST (2 MINS)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"Now let me show you what happens WITHOUT RAG."
+
+[TOGGLE OFF THE "ENABLE RAG" SWITCH]
+
+"I've turned off RAG. Let's ask the same question."
+
+[TYPE: "How many days of annual leave do employees get?"]
+
+[WAIT FOR RESPONSE]
+
+"See the difference? The LLM either gives a generic answer like 'it depends
+on your company' or admits it doesn't know TechCorp's specific policy."
+
+"This is the core problem RAG solves. Without retrieval, the LLM has no idea
+about our internal documents. It's just using its general training data."
+
+[TOGGLE RAG BACK ON]
+
+-------------------------------------------------------------------------------
+DEMO 3: SIDE-BY-SIDE COMPARISON (3 MINS)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"Let me make this even clearer with a side-by-side comparison."
+
+[TOGGLE ON "COMPARE RAG VS NO RAG"]
+
+"I've enabled comparison mode. Now let's ask about password policy."
+
+[TYPE: "What is the password policy?"]
+
+[WAIT FOR BOTH RESULTS TO LOAD]
+
+"Look at this side by side:"
+
+[POINT TO LEFT COLUMN]
+"On the left - WITH RAG: The answer is specific. 12 characters minimum,
+must include uppercase, lowercase, numbers, and symbols. Changed every 90
+days. This is exactly what's in TechCorp's IT policy."
+
+[POINT TO RIGHT COLUMN]
+"On the right - WITHOUT RAG: Generic advice about password best practices,
+or it simply says it doesn't have that information."
+
+"This comparison really highlights the value of RAG. We're grounding the LLM
+in our actual company data, making it useful for real business scenarios."
+
+
+================================================================================
+PART 5: AGENTIC RAG - TAB 3 (7 MINS)
+================================================================================
+
+[CLICK ON TAB 3: AGENTIC RAG]
+
+-------------------------------------------------------------------------------
+EXPLAIN THE CONCEPT (2 MINS)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"Now let's take RAG to the next level with Agentic RAG."
+
+"In Basic RAG, every question triggers a retrieval. Even if I ask 'What is
+2 plus 2?', it would search the documents - which is wasteful."
+
+"Agentic RAG adds intelligence. We give the LLM a TOOL - the search function.
+The LLM, acting as an agent, DECIDES whether to use that tool or not."
+
+"Think of it like a smart assistant who knows when to check the company
+handbook versus when to just answer from general knowledge."
+
+"Let me demonstrate."
+
+-------------------------------------------------------------------------------
+DEMO 1: COMPANY QUESTION - USES TOOL (2 MINS)
+-------------------------------------------------------------------------------
+
+[MAKE SURE "COMPARE" TOGGLE IS OFF]
+
+SPEAK:
+"First, a company-specific question."
+
+[TYPE: "What is the expense limit for client meals?"]
+
+"Watch the agent's thinking process:"
+
+[POINT TO EACH STEP]
+
+"Step 1 - Analyzing: The agent reads my question."
+
+"Step 2 - Decision: It recognizes this is about company expense policy, so
+it decides to USE the RAG tool."
+
+"Step 3 - Tool Call: It calls the search_company_docs tool with a specific
+search query."
+
+"Then it retrieves the relevant information and generates the answer."
+
+[POINT TO THE ANSWER]
+
+"The answer correctly states $75 per person for client meals, directly from
+our expense policy. The agent made the right decision to use the tool."
+
+-------------------------------------------------------------------------------
+DEMO 2: GENERAL QUESTION - NO TOOL (1 MIN)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"Now let's try a general knowledge question."
+
+[TYPE: "What is 2+2?"]
+
+[WAIT FOR RESPONSE]
+
+"Look at the thinking process now:"
+
+[POINT TO STEP 2]
+
+"The agent decided this is a general knowledge question - no need to search
+company documents. It answers directly: 4."
+
+"This is efficient. We're not wasting a search operation on something the
+LLM already knows."
+
+[OPTIONAL: TRY "Who is the CEO of Microsoft?"]
+
+-------------------------------------------------------------------------------
+DEMO 3: COMPLEX MULTI-PART QUESTION (2 MINS)
+-------------------------------------------------------------------------------
+
+SPEAK:
+"Here's where Agentic RAG really shines - complex questions."
+
+[TYPE: "What is the leave policy and what are the password requirements?"]
+
+"This question has TWO parts - leave policy from HR, password from IT.
+Watch what the agent does:"
+
+[WAIT FOR RESPONSE]
+
+[POINT TO THE TOOL CALLS SECTION]
+
+"Look - the agent made MULTIPLE searches!"
+"Search #1: Looking for leave policy"
+"Search #2: Looking for password requirements"
+
+"It intelligently broke down my complex question, searched for each part
+separately, and then combined the results into one comprehensive answer."
+
+[POINT TO THE FINAL ANSWER]
+
+"The answer covers both - leave days AND password policy. This is the power
+of agentic systems. They adapt to the complexity of the question."
+
+[POINT TO THE METRICS]
+
+"You can see the metrics: 2 RAG searches were made for this one question."
+
+
+================================================================================
+PART 6: WRAP-UP & KEY TAKEAWAYS (2 MINS)
+================================================================================
+
+[CAN GO BACK TO A SLIDE OR JUST SPEAK]
+
+SPEAK:
+"Let me summarize what we've seen today."
+
+"KEY TAKEAWAY 1: RAG bridges the knowledge gap. LLMs are powerful but they
+don't know your private data. RAG lets you ground them in YOUR documents."
+
+"KEY TAKEAWAY 2: The RAG pipeline has clear steps:"
+"Load documents, Chunk them, Create embeddings, Store in vector database,
+Retrieve relevant chunks, Generate answer."
+
+"KEY TAKEAWAY 3: Agentic RAG adds a decision layer. The agent intelligently
+chooses WHEN to retrieve, making the system more efficient and capable of
+handling complex, multi-part questions."
+
+"REAL-WORLD APPLICATIONS:"
+"- Internal knowledge bases like what we demoed"
+"- Customer support chatbots that know your product docs"
+"- Legal document search"
+"- Code documentation assistants"
+"- Healthcare information retrieval"
+
+"When should you use Basic RAG vs Agentic RAG?"
+"- Use Basic RAG for simple, focused Q&A where every question needs document search"
+"- Use Agentic RAG when questions might be mixed - some need docs, some don't"
+"- Agentic RAG is also better for complex queries that need multiple searches"
+
+
+================================================================================
+Q&A PREPARATION - LIKELY QUESTIONS & ANSWERS
+================================================================================
+
+Q: "How does it handle updates to documents?"
+A: "You would need to re-process the updated documents - reload, re-chunk,
+   re-embed. Some systems do this incrementally. For production, you'd set up
+   a pipeline that detects changes and updates only affected chunks."
+
+Q: "What about security? Can anyone access all documents?"
+A: "Great question. In production, you'd add access control. Each chunk can
+   have metadata about who can access it. During retrieval, you filter based
+   on the user's permissions."
+
+Q: "How accurate is the retrieval?"
+A: "It depends on chunk size, embedding model quality, and how you phrase
+   questions. You can improve accuracy by tuning chunk size, using better
+   embeddings, or adding a re-ranking step after retrieval."
+
+Q: "Can it handle PDFs and images?"
+A: "Yes, LangChain has document loaders for PDFs, Word docs, PowerPoints. For
+   images within documents, you'd need a multi-modal approach - either OCR
+   for text extraction or vision models for understanding images."
+
+Q: "What's the cost of running this?"
+A: "Main costs are: embedding API calls (one-time during indexing), LLM API
+   calls (per query), and vector database hosting. For this demo scale, costs
+   are minimal. At enterprise scale, you'd optimize with caching and batching."
+
+Q: "How is this different from just using ChatGPT with a long document?"
+A: "Two issues with that approach: First, context limits - you can't paste
+   very large documents. Second, even if you could, the LLM might miss
+   relevant details in a huge context. RAG retrieves only the relevant
+   parts, which is more accurate and efficient."
+
+
+================================================================================
+SAMPLE QUESTIONS TO USE DURING DEMO
+================================================================================
+
+FOR BASIC RAG:
+- "How many days of annual leave do employees get?"
+- "What is the password policy?"
+- "What is the daily meal allowance for travel?"
+- "Can I get reimbursed for taxi rides?"
+- "What are the working hours at TechCorp?"
+
+FOR AGENTIC RAG:
+- Company questions (will use tool):
+  * "What is the expense limit for client meals?"
+  * "How often should passwords be changed?"
+  * "What is TechCorp's remote work policy?"
+
+- General questions (won't use tool):
+  * "What is 2+2?"
+  * "Who wrote Romeo and Juliet?"
+  * "What is the capital of France?"
+
+- Complex multi-part questions:
+  * "What is the leave policy and what are the password requirements?"
+  * "Tell me about expense limits for hotels and flights"
+  * "What are the IT security guidelines and remote work policies?"
+
+
+================================================================================
+TIMING CHECKLIST
+================================================================================
+
+[  ] Part 1: Recap              - 2 mins  (Total: 2 mins)
+[  ] Part 2: Setup              - 3 mins  (Total: 5 mins)
+[  ] Part 3: Document Processing- 8 mins  (Total: 13 mins)
+[  ] Part 4: Basic RAG          - 8 mins  (Total: 21 mins)
+[  ] Part 5: Agentic RAG        - 7 mins  (Total: 28 mins)
+[  ] Part 6: Wrap-up            - 2 mins  (Total: 30 mins)
+
+
+================================================================================
+PRE-PRESENTATION CHECKLIST
+================================================================================
+
+[  ] API key ready (don't type it live - have it copied)
+[  ] App running: streamlit run app.py
+[  ] Internet connection stable
+[  ] Sample questions copied somewhere for quick paste
+[  ] Backup screenshots in case demo fails
+[  ] Water bottle nearby
+[  ] Test the full flow once before the presentation
+
+
+================================================================================
+                              GOOD LUCK! YOU'VE GOT THIS!
+================================================================================

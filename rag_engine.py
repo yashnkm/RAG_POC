@@ -142,9 +142,10 @@ Context:
             tools=[search_company_docs],
             prompt="""You are a helpful company assistant with access to internal documents.
 
-When users ask about company policies (HR, IT, expenses, leave, etc.), use the search_company_docs tool to find accurate information.
+When users ask about company policies (HR, IT, expenses, leave, TechCorp etc.),  or anything about techcorp use the search_company_docs tool to find accurate information.
+if the query has more than one part use the tool more than once to get a good analysis so basically repeat the prcoess of analysis and all
 
-For general questions not related to company policies, answer from your knowledge.
+For general questions not related to company policies or techcorp, answer from your knowledge.
 
 Always be helpful and cite which document the information came from when using the tool."""
         )
@@ -152,14 +153,14 @@ Always be helpful and cite which document the information came from when using t
         return agent, search_company_docs
 
     def run_agent(self, question: str):
-        """Run the agentic RAG and capture tool calls"""
+        """Run the agentic RAG and capture ALL tool calls for complex multi-part questions"""
         agent, tool_func = self.create_rag_agent()
 
-        # Collect all steps
+        # Collect all steps and ALL tool calls across iterations
         steps = []
         final_answer = ""
-        tool_calls = []
-        retrieved_docs = []
+        all_tool_calls = []
+        all_retrieved_docs = []
 
         for step in agent.stream(
             {"messages": [{"role": "user", "content": question}]},
@@ -168,21 +169,23 @@ Always be helpful and cite which document the information came from when using t
             last_msg = step["messages"][-1]
             steps.append(last_msg)
 
-            # Check for tool calls
+            # Collect ALL tool calls (append, don't overwrite)
             if hasattr(last_msg, 'tool_calls') and last_msg.tool_calls:
-                tool_calls = last_msg.tool_calls
+                for tc in last_msg.tool_calls:
+                    all_tool_calls.append(tc)
 
-            # Check for tool response with artifacts
+            # Collect ALL retrieved docs
             if hasattr(last_msg, 'artifact') and last_msg.artifact:
-                retrieved_docs = last_msg.artifact
+                all_retrieved_docs.extend(last_msg.artifact)
 
-            # Get final answer
+            # Get final answer (last content message)
             if hasattr(last_msg, 'content') and isinstance(last_msg.content, str):
                 final_answer = last_msg.content
 
         return {
             "answer": final_answer,
             "steps": steps,
-            "tool_calls": tool_calls,
-            "retrieved_docs": retrieved_docs
+            "tool_calls": all_tool_calls,
+            "retrieved_docs": all_retrieved_docs,
+            "num_searches": len(all_tool_calls)
         }

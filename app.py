@@ -335,8 +335,8 @@ with tab3:
                     ''', unsafe_allow_html=True)
 
             else:
-                # Single agentic mode with step visualization
-                st.markdown("### 🧠 Agent Reasoning")
+                # Single agentic mode with thinking visualization
+                st.markdown("### 🧠 Agent Thinking Process")
 
                 with st.spinner("Agent is thinking..."):
                     try:
@@ -346,34 +346,54 @@ with tab3:
                         agent_result = None
 
                 if agent_result:
-                    # Show tool calls if any
                     tool_calls = agent_result["tool_calls"]
+                    num_searches = agent_result.get("num_searches", len(tool_calls) if tool_calls else 0)
+
+                    # Step 1: Analyzing
+                    st.markdown(f'''
+                    <div class="agent-box" style="border-left-color: #17a2b8;">
+                        <strong>💭 Step 1: Analyzing Question</strong><br>
+                        <p>"{agent_query}"</p>
+                    </div>
+                    ''', unsafe_allow_html=True)
+
                     if tool_calls:
-                        st.markdown("### 🔧 Tool Call Detected")
-                        for tc in tool_calls:
-                            tool_name = tc.get('name', 'unknown')
-                            tool_args = tc.get('args', {})
+                        # Step 2: Decision
+                        if num_searches > 1:
+                            decision_text = f"Complex multi-part question detected → <strong>Multiple RAG searches needed ({num_searches})</strong>"
+                        else:
+                            decision_text = "Company policy question → <strong>Use RAG tool</strong>"
+
+                        st.markdown(f'''
+                        <div class="agent-box" style="border-left-color: #28a745;">
+                            <strong>💭 Step 2: Decision</strong><br>
+                            <p>{decision_text}</p>
+                        </div>
+                        ''', unsafe_allow_html=True)
+
+                        # Show ALL tool calls
+                        st.markdown("### 🔧 Tool Calls")
+                        for i, tc in enumerate(tool_calls, 1):
+                            tool_query = tc.get('args', {}).get('query', 'N/A')
                             st.markdown(f'''
                             <div class="tool-call-box">
-                                <strong>🔧 Agent decided to use tool:</strong> {tool_name}<br>
-                                <strong>Search Query:</strong> "{tool_args.get('query', 'N/A')}"
+                                <strong>🔧 Search #{i}</strong><br>
+                                <p>Query: "{tool_query}"</p>
                             </div>
                             ''', unsafe_allow_html=True)
 
-                        # Show retrieved docs
-                        if agent_result["retrieved_docs"]:
-                            st.markdown("### 📄 Retrieved Documents")
-                            for i, doc in enumerate(agent_result["retrieved_docs"][:3]):
-                                st.markdown(f'''
-                                <div class="retrieval-box">
-                                    <strong>#{i+1}</strong>
-                                    <span class="score-badge">{doc.metadata.get("source", "N/A")}</span>
-                                    <hr>{doc.page_content[:300]}...
-                                </div>
-                                ''', unsafe_allow_html=True)
+                        st.markdown(f'''
+                        <div class="agent-box" style="border-left-color: #ffc107;">
+                            <strong>💭 Combining {num_searches} search result(s), generating answer...</strong>
+                        </div>
+                        ''', unsafe_allow_html=True)
                     else:
-                        st.markdown("### 💭 Direct Response")
-                        st.info("Agent decided NO tool was needed - answering from general knowledge")
+                        st.markdown(f'''
+                        <div class="agent-box" style="border-left-color: #dc3545;">
+                            <strong>💭 Step 2: Decision</strong><br>
+                            <p>General knowledge question → <strong>Answer directly (no tool needed)</strong></p>
+                        </div>
+                        ''', unsafe_allow_html=True)
 
                     # Final answer
                     st.markdown("### 💬 Final Answer")
@@ -386,5 +406,5 @@ with tab3:
                     # Summary
                     st.markdown("---")
                     col1, col2 = st.columns(2)
-                    col1.metric("Tools Used", len(tool_calls) if tool_calls else 0)
-                    col2.metric("Docs Retrieved", len(agent_result["retrieved_docs"]) if agent_result["retrieved_docs"] else 0)
+                    col1.metric("RAG Searches", num_searches)
+                    col2.metric("Decision", "Used RAG" if tool_calls else "Direct Answer")
