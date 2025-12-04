@@ -1,0 +1,52 @@
+# TechCorp IT Security Policy
+
+## 1. Password Requirements
+- Minimum 12 characters with uppercase, lowercase, numbers, and special characters
+- Passwords must be changed every 90 days
+- Password history: Cannot reuse last 5 passwords
+- Account lockout after 5 failed login attempts
+
+## 2. Device Security
+All company-issued devices must have:
+- Full disk encryption enabled
+- Antivirus software installed and updated
+- Automatic screen lock after 5 minutes of inactivity
+- VPN connection when accessing company resources remotely
+
+## 3. Email Security
+- Do not click on suspicious links or attachments
+- Report phishing emails to security@techcorp.com
+- Do not use personal email for official communications
+- Encrypt emails containing sensitive information
+
+## 4. Software Installation
+- Only approved software from the company catalog may be installed
+- All software requests must go through the IT Service Desk
+- Unauthorized software will be removed during security audits
+- Software licenses must be tracked and renewed on time
+
+## 5. Data Classification
+Data at TechCorp is classified into four categories:
+- Public: Can be shared externally
+- Internal: For internal use only
+- Confidential: Restricted access, need-to-know basis
+- Highly Confidential: Requires encryption and access logging
+
+## 6. Incident Reporting
+Security incidents must be reported immediately to the IT Security team:
+- Email: security@techcorp.com
+- Phone: +1-800-SECURITY (ext. 5555)
+- Slack: #security-incidents
+
+## 7. VPN Access
+- VPN must be used when working remotely
+- Download the TechCorp VPN client from the IT portal
+- VPN credentials are the same as your corporate login
+- Contact IT helpdesk for VPN configuration issues
+
+## 8. BYOD Policy
+Personal devices accessing company data must:
+- Be registered with IT
+- Have MDM (Mobile Device Management) software installed
+- Use company-approved security apps
+- Be wiped remotely if lost or stolen

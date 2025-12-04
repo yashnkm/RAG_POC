@@ -1,0 +1,60 @@
+# TechCorp Expense Reimbursement Policy
+
+## 1. General Guidelines
+All business expenses must be pre-approved by your manager before incurring. Expense reports must be submitted within 30 days of the expense date. Original receipts are required for all expenses above $25.
+
+## 2. Travel Expenses
+
+### Flights
+- Economy class for flights under 6 hours
+- Premium economy for flights over 6 hours
+- Business class requires VP approval
+- Book through the company travel portal (TravelDesk) for best rates
+
+### Hotels
+- Maximum of $200/night for domestic travel
+- Maximum of $300/night for international travel
+- Exceptions require director approval
+- Book through TravelDesk or approved booking platforms
+
+### Ground Transportation
+- Uber/Lyft preferred over taxis
+- Rental cars only when public transport is not feasible
+- Mileage reimbursement: $0.67 per mile for personal vehicle use
+
+## 3. Meals and Entertainment
+
+### Daily Meal Allowance
+- Breakfast: $15
+- Lunch: $25
+- Dinner: $45
+- Alcohol is not reimbursable except for client entertainment
+
+### Client Entertainment
+- Pre-approval required for expenses over $100
+- Maximum $75 per person for client meals
+- Entertainment must have clear business purpose
+- Names of all attendees must be documented
+
+## 4. Office Supplies
+- Supplies under $50 can be purchased directly
+- Supplies over $50 require manager approval
+- Use approved vendors from the procurement portal
+- Keep all receipts for tax purposes
+
+## 5. Expense Submission Process
+1. Collect all receipts and documentation
+2. Log into ExpenseTracker portal
+3. Create a new expense report
+4. Attach scanned receipts
+5. Submit for manager approval
+6. Reimbursement processed within 10 business days
+
+## 6. Non-Reimbursable Expenses
+- Personal entertainment
+- Traffic violations and parking tickets
+- Airline upgrades (unless pre-approved)
+- Mini-bar charges
+- Gym or spa services
+- Personal phone calls
+- Childcare expenses
